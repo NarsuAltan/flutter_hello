@@ -1,6 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_hello/global_data.dart';
+
+class NativeBridge {
+  static const MethodChannel _channel = MethodChannel("my_custom_channel");
+
+  static void initListener() {
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == "onNativeEvent") {
+        final args = call.arguments as Map?;
+        if (args != null && args['type'] == 'apnsToken') {
+          GlobalData.apnsToken = args['value'];
+          print("📩 收到 APNs token: ${GlobalData.apnsToken}");
+        }
+      }
+    });
+  }
+}
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized(); // ✅ 初始化 Flutter Binding
+  NativeBridge.initListener();
   runApp(const MyApp());
 }
 
